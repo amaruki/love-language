@@ -51,17 +51,17 @@ const TestTypeCard = ({ type, index }) => (
 	>
 		<picture>
 			<source
-				srcset={`./src/assets/${encodeURIComponent(type.toLowerCase())}-test.webp`}
+				srcset={`/${encodeURIComponent(type.toLowerCase())}-test.webp`}
 				type="image/webp"
 				media="(max-width: 640px)"
 			/>
 			<source
-				srcset={`./src/assets/${encodeURIComponent(type.toLowerCase())}-test.jpg`}
+				srcset={`/${encodeURIComponent(type.toLowerCase())}-test.jpg`}
 				type="image/jpeg"
 				media="(max-width: 640px)"
 			/>
 			<img
-				src={`./src/assets/${encodeURIComponent(type.toLowerCase())}-test.jpg`}
+				src={`/${encodeURIComponent(type.toLowerCase())}-test.jpg`}
 				alt={`${type} Love Language Test`}
 				className="w-full h-48 object-cover"
 				loading="lazy"
@@ -154,27 +154,27 @@ export default function Home() {
 			<div className="mb-12 relative" role="banner">
 				<picture>
 					<source
-						srcset="./src/assets/hero.webp"
+						srcset="/hero.webp"
 						type="image/webp"
 						media="(min-width: 768px)"
 					/>
 					<source
-						srcset="./src/assets/hero.jpg"
+						srcset="/hero.jpg"
 						type="image/jpeg"
 						media="(min-width: 768px)"
 					/>
 					<source
-						srcset="./src/assets/hero-mobile.webp"
+						srcset="/hero-mobile.webp"
 						type="image/webp"
 						media="(max-width: 767px)"
 					/>
 					<source
-						srcset="./src/assets/hero-mobile.jpg"
+						srcset="/hero-mobile.jpg"
 						type="image/jpeg"
 						media="(max-width: 767px)"
 					/>
 					<img
-						src="./src/assets/hero.jpg"
+						src="/hero.jpg"
 						alt="Temukan Bahasa Cinta Anda"
 						className="w-full rounded-xl shadow-soft object-cover max-h-80"
 						loading="eager"
@@ -227,17 +227,17 @@ export default function Home() {
 						<div className="md:w-1/2">
 							<picture>
 								<source
-									srcset="./src/assets/introduction.webp"
+									srcset="/introduction.webp"
 									type="image/webp"
 									media="(min-width: 768px)"
 								/>
 								<source
-									srcset="./src/assets/introduction.jpg"
+									srcset="/introduction.jpg"
 									type="image/jpeg"
 									media="(min-width: 768px)"
 								/>
 								<img
-									src="./src/assets/introduction.jpg"
+									src="/introduction.jpg"
 									alt="Pasangan Memahami Bahasa Cinta"
 									className="
 										rounded-xl shadow-soft 
@@ -282,17 +282,17 @@ export default function Home() {
 						<div className="md:w-1/4">
 							<picture>
 								<source
-									srcset="./src/assets/cta.webp"
+									srcset="/cta.webp"
 									type="image/webp"
 									media="(min-width: 768px)"
 								/>
 								<source
-									srcset="./src/assets/cta.jpg"
+									srcset="/cta.jpg"
 									type="image/jpeg"
 									media="(min-width: 768px)"
 								/>
 								<img
-									src="./src/assets/cta.jpg"
+									src="/cta.jpg"
 									alt="Tes Bahasa Cinta"
 									className="
 										rounded-xl shadow-soft 

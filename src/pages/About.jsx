@@ -176,7 +176,7 @@ export default function About() {
                 <div className="flex flex-col md:flex-row items-center">
                     <div className="md:w-1/3 mb-6 md:mb-0">
                         <img
-                            src="./src/assets/gary-chapman.png"
+                            src="/gary-chapman.png"
                             alt="Dr. Gary Chapman"
                             className="rounded-full w-64 h-64 object-cover mx-auto"
                         />
