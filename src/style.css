@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@theme {
+	--font-display: 'Allura', cursive;
+	--color-primary: #fbcfe8;
+	/* Pink pastel */
+	--color-secondary: #fecdd3;
+	/* Peach pastel */
+	--shadow-soft: 0 4px 6px -1px rgba(244, 114, 182, 0.1), 0 2px 4px -1px rgba(244, 114, 182, 0.06);
+	--animate-slide-down: slide-down 0.1s ease-out;
+	--text-base-size: 16px;
+	--leading-relaxed: 1.625;
+
+	@keyframes slide-down {
+		0% {
+			transform: translateY(-10px);
+			opacity: 0;
+		}
+
+		100% {
+			transform: translateY(0);
+			opacity: 1;
+		}
+	}
+}
