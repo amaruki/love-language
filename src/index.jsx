@@ -1,4 +1,4 @@
-import { LocationProvider, Router, Route } from 'preact-iso';
+import { LocationProvider, Router, Route, prerender as ssr } from 'preact-iso';
 
 import { getSavedAnswers, getTestResults } from './utils/localStorage.js';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
@@ -117,4 +117,11 @@ export default function App() {
 	);
 }
 
-render(<App />, document.getElementById('app'));
+if (typeof document !== 'undefined') {
+	render(<App />, document.getElementById('app'));
+}
+
+export async function prerender(data) {
+	const { html } = await ssr(<App />);
+	return { html };
+}
