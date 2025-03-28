@@ -48,11 +48,9 @@ export default function App() {
 
 	// Buat custom route component untuk test
 	const TestRoute = ({ params }) => {
-		// params.type sekarang tersedia melalui destructuring
 		return (
 			<Test
 				type={params.type}
-				// userAnswers={userAnswers}
 				setUserAnswers={setUserAnswers}
 				setUserResults={setUserResults}
 				setTestType={setTestType}
