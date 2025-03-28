@@ -3,7 +3,7 @@ import { LocationProvider, Router, Route, prerender as ssr } from 'preact-iso';
 import { getSavedAnswers, getTestResults } from './utils/localStorage.js';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useEffect, useState } from 'preact/hooks';
-import './style.css';
+
 import Layout from './components/Layout.jsx';
 import Test from './pages/Test.jsx';
 import Home from './pages/Home';
@@ -12,6 +12,8 @@ import Result from './pages/Result.jsx';
 import About from './pages/About.jsx';
 import { NotFound } from './pages/_404.jsx';
 import { render } from 'preact';
+
+import './style.css';
 
 export default function App() {
 	const [user, setUser] = useState(null);
@@ -33,39 +35,8 @@ export default function App() {
 			setLoading(false);
 		});
 
-		const coupleAnswers = getSavedAnswers('couple');
-		const singleAnswers = getSavedAnswers('single');
-		const parentAnswers = getSavedAnswers('parent');
-
-		console.log("[Debug] Loading saved answers in App:", {
-			couple: coupleAnswers,
-			single: singleAnswers,
-			parent: parentAnswers
-		});
-
-		setUserAnswers({
-			couple: coupleAnswers,
-			single: singleAnswers,
-			parent: parentAnswers
-		});
-
 		return () => unsubscribe();
 	}, []);
-
-	// Fungsi untuk memuat hasil tes berdasarkan tipe
-	const loadResults = (type) => {
-		if (!type) return;
-
-		const savedResults = getTestResults(type);
-		if (savedResults) {
-			setUserResults(savedResults.results);
-		}
-	};
-
-	// Load results when testType changes
-	useEffect(() => {
-		loadResults(testType);
-	}, [testType]);
 
 	if (loading) {
 		return (
@@ -81,7 +52,7 @@ export default function App() {
 		return (
 			<Test
 				type={params.type}
-				userAnswers={userAnswers}
+				// userAnswers={userAnswers}
 				setUserAnswers={setUserAnswers}
 				setUserResults={setUserResults}
 				setTestType={setTestType}

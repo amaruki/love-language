@@ -87,7 +87,6 @@ export const languageDescriptions = {
             tips: 'Rencanakan pertemuan atau aktivitas yang memungkinkan interaksi bermakna. Pilih kafe tenang untuk ngobrol, ajak teman hiking, atau bermain board game bersama.',
             extra_tips: 'Kualitas selalu lebih penting daripada kuantitas dalam hubungan!'
         },
-        // Tambahkan deskripsi untuk love language lainnya
         'c': {
             title: 'Pemberian Hadiah (Receiving Gifts)',
             desc: 'Bagi Anda, hadiah bukanlah tentang materi, melainkan tentang makna dan perhatian di baliknya. Setiap hadiah adalah simbol hubungan, pengertian, dan kepedulian. Anda menghargai gesture kecil yang menunjukkan bahwa seseorang memikirkan Anda.',

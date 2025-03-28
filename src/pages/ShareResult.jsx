@@ -4,7 +4,9 @@ import { useState } from 'preact/hooks';
 export default function ShareResults({ topResult, testType }) {
     const [copied, setCopied] = useState(false);
 
-    const shareText = `Hai! Saya baru saja menemukan bahasa cinta saya adalah "${topResult.name}" melalui tes Love Language. Ingin tahu bahasa cintamu? Coba tes di: [MASUKKAN LINK WEBSITE ANDA]`;
+    const websiteUrl = window.location.origin;
+    const shareUrl = `${websiteUrl}/test/${testType}`;
+    const shareText = `Hai! Saya baru saja menemukan bahasa cinta saya adalah "${topResult.title}" melalui tes Love Language (${testType}). Ingin tahu bahasa cintamu? Coba tes di: ${shareUrl}`;
 
     const handleShareNative = async () => {
         if (navigator.share) {
@@ -20,8 +22,7 @@ export default function ShareResults({ topResult, testType }) {
     };
 
     const handleCopyLink = () => {
-        const websiteUrl = window.location.origin; // Dapatkan URL situs Anda
-        navigator.clipboard.writeText(`${websiteUrl}/test/${testType}`);
+        navigator.clipboard.writeText(shareText);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };

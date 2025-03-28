@@ -55,7 +55,7 @@ export const single = [
         }
     },
     {
-        id: "q6",
+        id: "s6",
         question: "Apa yang membuat Anda merasa terhubung dengan orang terdekat?",
         options: {
             a: "Mereka mengungkapkan perasaan dengan kata-kata.",
@@ -66,7 +66,7 @@ export const single = [
         }
     },
     {
-        id: "q7",
+        id: "s7",
         question: "Jika hari Anda buruk, apa yang Anda inginkan dari orang terdekat?",
         options: {
             a: "Kata-kata yang menghibur atau memotivasi.",
@@ -121,7 +121,7 @@ export const single = [
         }
     },
     {
-        id: "q12",
+        id: "s12",
         question: "Apa yang membuat ulang tahun Anda spesial?",
         options: {
             a: "Ucapan tulus dari orang terdekat.",

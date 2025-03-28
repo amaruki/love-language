@@ -1,156 +1,196 @@
 import { useState, useEffect } from 'preact/hooks';
 
-/**
- * Menyimpan hasil tes ke localStorage
- * @param {string} testType - Tipe tes (couple, single, parent)
- * @param {Object} answers - Jawaban pengguna
- * @param {Array} results - Hasil perhitungan
- * @returns {Object} - Data hasil yang disimpan
- */
-export const saveTestResults = (testType, answers, results) => {
+// Konstanta untuk kunci localStorage
+const RESULTS_STORAGE_KEY = (testType) => `${testType}_results`;
+const SEED_STORAGE_KEY = (testType) => `${testType}_shuffle_seed`;
+
+export const saveTestResults = (testType, answers, results, shuffleSeed, questions) => {
+    const enhancedAnswers = Object.fromEntries(
+        Object.entries(answers).map(([questionId, answerData]) => {
+            const question = questions.find(q => q.id === questionId);
+            const questionIndex = questions.findIndex(q => q.id === questionId);
+            const selectedShuffledKey = answerData.answer;
+            const originalKey = question?.options?.[selectedShuffledKey]?.originalKey;
+            const answerText = question?.options?.[selectedShuffledKey]?.text;
+
+            return [questionId, {
+                ...answerData,
+                shuffledKey: selectedShuffledKey,
+                originalKey: originalKey || null,
+                answerText: answerText || null,
+                questionIndex: questionIndex,
+                questionText: question ? question.question : null, // Teks pertanyaan
+            }];
+        })
+    );
+
     const resultData = {
-        answers,
+        answers: enhancedAnswers,
         results,
         testType,
-        timestamp: new Date().toISOString()
+        shuffleSeed,
+        timestamp: new Date().toISOString(),
+        totalQuestions: questions.length
     };
 
-    // Validasi data sebelum menyimpan
-    if (!results || !Array.isArray(results) || results.length === 0) {
-        console.error('Invalid results data:', results);
-        return null;
-    }
-
-    console.log(`Saving ${testType} results to localStorage:`, resultData);
-
-    // Simpan hasil terbaru untuk tipe tes ini
     try {
-        localStorage.setItem(`${testType}_results`, JSON.stringify(resultData));
-        // Simpan history hasil
-        saveToHistory(resultData);
+        localStorage.setItem(RESULTS_STORAGE_KEY(testType), JSON.stringify(resultData));
         return resultData;
     } catch (error) {
         console.error('Error saving results to localStorage:', error);
+        alert("Gagal menyimpan progres tes. Penyimpanan browser mungkin penuh.");
         return null;
     }
 };
 
-/**
- * Menyimpan hasil ke riwayat tes
- * @param {Object} resultData - Data hasil tes
- */
-const saveToHistory = (resultData) => {
-    try {
-        let history = JSON.parse(localStorage.getItem('results_history') || '[]');
-        history.push(resultData);
-
-        // Batasi history ke 10 hasil terakhir
-        if (history.length > 10) {
-            history = history.slice(-10);
-        }
-
-        localStorage.setItem('results_history', JSON.stringify(history));
-    } catch (error) {
-        console.error('Error saving to history:', error);
-    }
-};
-
-/**
- * Mengambil hasil tes dari localStorage
- * @param {string} testType - Tipe tes (couple, single, parent)
- * @returns {Object|null} Data hasil tes atau null jika tidak ada
- */
 export const getTestResults = (testType) => {
     try {
-        const savedData = localStorage.getItem(`${testType}_results`);
+        const savedData = localStorage.getItem(RESULTS_STORAGE_KEY(testType));
+
         if (!savedData) {
             console.log(`No saved results found for ${testType}`);
             return null;
         }
+
         const parsedData = JSON.parse(savedData);
-        console.log(`Retrieved ${testType} results from localStorage:`, parsedData);
         return parsedData;
     } catch (error) {
         console.error(`Error retrieving ${testType} results:`, error);
+
+        if (error instanceof SyntaxError) {
+            console.error('Syntax error parsing JSON. Data might be corrupted.');
+        }
+
         return null;
     }
 };
 
-/**
- * Mengambil jawaban tes yang disimpan
- * @param {string} testType - Tipe tes (couple, single, parent)
- * @returns {Object} Jawaban tes atau objek kosong jika tidak ada
- */
-export const getSavedAnswers = (testType) => {
+// Mengambil jawaban yang tersimpan, divalidasi dengan seed saat ini
+export const getSavedAnswers = (testType, currentShuffleSeed, currentQuestions) => {
     try {
-        const savedAnswers = localStorage.getItem(`${testType}_answers`);
-        if (!savedAnswers) return {};
-        return JSON.parse(savedAnswers);
+        const savedResultData = getTestResults(testType);
+        if (!savedResultData) {
+            return {};
+        }
+
+        const savedSeed = savedResultData.shuffleSeed;
+
+        if (savedSeed !== currentShuffleSeed) {
+            console.warn(`Shuffle seed mismatch for ${testType}. Saved: ${savedSeed}, Current: ${currentShuffleSeed}. Discarding saved answers and clearing old data.`);
+            clearTestData(testType);
+            return {};
+        }
+
+        const validatedAnswers = {};
+        Object.entries(savedResultData.answers).forEach(([questionId, savedAnswerData]) => {
+            const correspondingQuestion = currentQuestions.find(q => q.id === questionId);
+            const savedShuffledKey = savedAnswerData.shuffledKey;
+
+            if (correspondingQuestion?.options?.[savedShuffledKey]) {
+                validatedAnswers[questionId] = {
+                    answer: savedShuffledKey,
+                    timestamp: savedAnswerData.timestamp
+                };
+            } else {
+                console.warn(`Answer for question ID ${questionId} is discarded due to question/option mismatch.`);
+            }
+        });
+
+        return validatedAnswers;
+
     } catch (error) {
-        console.error(`Error retrieving ${testType} answers:`, error);
+        console.error(`Error retrieving or validating ${testType} answers:`, error);
         return {};
     }
 };
 
-/**
- * Hook custom untuk mengelola state yang terkait dengan localStorage
- * @param {string} key - Kunci localStorage
- * @param {any} initialValue - Nilai awal jika tidak ada data di localStorage
- * @returns {Array} [value, setValue] - State dan fungsi untuk mengubahnya
- */
+
 export const useLocalStorage = (key, initialValue) => {
     const [value, setValue] = useState(() => {
         try {
+            const initial = typeof initialValue === 'function' ? initialValue() : initialValue;
             const item = localStorage.getItem(key);
-            return item ? JSON.parse(item) : initialValue;
+            return item ? JSON.parse(item) : initial;
         } catch (error) {
             console.error(`Error loading localStorage key "${key}":`, error);
-            return initialValue;
+            const initial = typeof initialValue === 'function' ? initialValue() : initialValue;
+            return initial;
         }
     });
 
     useEffect(() => {
         try {
-            localStorage.setItem(key, JSON.stringify(value));
+            if (value === undefined) {
+                localStorage.removeItem(key);
+            } else {
+                localStorage.setItem(key, JSON.stringify(value));
+            }
         } catch (error) {
             console.error(`Error saving to localStorage key "${key}":`, error);
+            alert(`Gagal menyimpan pengaturan untuk ${key}. Penyimpanan browser mungkin penuh.`);
         }
     }, [key, value]);
 
     return [value, setValue];
 };
 
-/**
- * Mengambil riwayat hasil tes
- * @returns {Array} Array hasil tes
- */
-export const getResultsHistory = () => {
+
+export const getOrCreateShuffleSeed = (testType) => {
+    const storageKey = SEED_STORAGE_KEY(testType);
     try {
-        return JSON.parse(localStorage.getItem('results_history') || '[]');
+        const existingSeed = localStorage.getItem(storageKey);
+        if (existingSeed) {
+            return JSON.parse(existingSeed);
+        }
     } catch (error) {
-        console.error('Error retrieving results history:', error);
-        return [];
+        console.error('Error reading shuffle seed:', error);
+    }
+
+    // Buat seed baru jika tidak ada atau gagal dibaca
+    const newSeed = Date.now();
+    try {
+        localStorage.setItem(storageKey, JSON.stringify(newSeed));
+    } catch (error) {
+        console.error('Error saving new shuffle seed:', error);
+        alert("Gagal menyimpan data sesi tes. Progres mungkin tidak tersimpan jika Anda menutup browser.");
+    }
+    return newSeed;
+};
+
+export const clearShuffleSeed = (testType) => {
+    try {
+        localStorage.removeItem(SEED_STORAGE_KEY(testType));
+    } catch (error) {
+        console.error('Error clearing shuffle seed:', error);
     }
 };
 
-/**
- * Menghapus data tes dari localStorage
- * @param {string} testType - Tipe tes (couple, single, parent)
- */
+// Memperbaiki clearTestData untuk konsistensi
 export const clearTestData = (testType) => {
-    localStorage.removeItem(`${testType}_answers`);
-    localStorage.removeItem(`${testType}_results`);
+    try {
+        localStorage.removeItem(RESULTS_STORAGE_KEY(testType)); // Hapus data hasil & jawaban
+        localStorage.removeItem(SEED_STORAGE_KEY(testType));   // Hapus seed
+    } catch (error) {
+        console.error(`Error clearing test data for ${testType}:`, error);
+    }
 };
 
-/**
- * Menghapus semua data tes dari localStorage
- */
+// Menghapus semua data tes dari localStorage (sudah benar)
 export const clearAllTestData = () => {
-    localStorage.removeItem('couple_answers');
-    localStorage.removeItem('single_answers');
-    localStorage.removeItem('parent_answers');
-    localStorage.removeItem('couple_results');
-    localStorage.removeItem('single_results');
-    localStorage.removeItem('parent_results');
-    localStorage.removeItem('results_history');
+    try {
+        const types = ['couple', 'single', 'parent'];
+        types.forEach(type => {
+            localStorage.removeItem(RESULTS_STORAGE_KEY(type));
+            localStorage.removeItem(SEED_STORAGE_KEY(type));
+        });
+        // Hapus juga kunci lama jika masih ada (migrasi)
+        localStorage.removeItem('couple_answers');
+        localStorage.removeItem('single_answers');
+        localStorage.removeItem('parent_answers');
+        localStorage.removeItem('couple_timestamp');
+        localStorage.removeItem('single_timestamp');
+        localStorage.removeItem('parent_timestamp');
+    } catch (error) {
+        console.error('Error clearing all test data:', error);
+    }
 };
